@@ -6,7 +6,7 @@ import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-function TaskManipulationNavbar() {
+function TaskManipulationNavbar({onAddTask}) {
     const [showAddTaskModal, setShowAddTaskModal] = useState(false);
 
     // create_task forms
@@ -22,30 +22,18 @@ function TaskManipulationNavbar() {
             console.log("Missing fields");
             return;
         }
+
         try {
-            const response =  await fetch("http://localhost:5050/add_task", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    task_title: taskTitle,
-                    task_description: taskDescription,
-                    assigned_to: assignedTo,
-                    task_due_date: taskDueDate
-                }),
-            });
+            await onAddTask(
+                taskTitle,
+                taskDescription,
+                assignedTo,
+                taskDueDate
+            );
         
-            if (!response.ok) {
-                throw new Error("Failed to create task");
-            }
-        
-            const data = await response.json()
-            console.log("Created:", data);
-            
-            setShowAddTaskModal(false);   // close modal
-            setTaskTitle("");
-            setTaskDescription("");
+            setShowAddTaskModal(false);
+            setTaskTitle("")
+            setTaskDescription("")
         } catch (err) {
             console.error(err)
         }

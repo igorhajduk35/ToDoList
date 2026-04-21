@@ -6,14 +6,52 @@ function Tasks() {
     // DB
     const [tasks, setTasks] = useState([])
 
+    const handleDeleteTask = async(id) => {
+        await fetch("http://localhost:5050/discard_task", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                task_id: id
+            }),
+        });
+
+        fetchData();
+    }
+
+    const handleAddTask = async(title, description, assigned_to, due_date) => {
+        try {
+            const response = await fetch("http://localhost:5050/add_task", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    task_title: title,
+                    task_description: description,
+                    task_assigned_to: assigned_to,
+                    task_due_date: due_date
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to add task")
+            }
+
+            fetchData();
+
+        } catch (err) {
+            console.error(err)
+        }
+    }
+
     const fetchData = async() => {
-        const res = await fetch("http://localhost:5050/get_tasks");
+        const response = await fetch("http://localhost:5050/get_tasks");
 
-        const data = await res.json();
+        const data = await response.json();
 
-        console.log(data);
-
-        setTasks(data["users"]);
+        setTasks(data["tasks"]);
     }
 
     useEffect(() => {
@@ -22,9 +60,15 @@ function Tasks() {
 
     return(
         <div>
-            <TaskManipulationNavbar />
+            <TaskManipulationNavbar
+                onAddTask={handleAddTask}
+            />
             {tasks.map(task => (
-                <Task key={task.id} task={task}/>
+                <Task
+                    key={task.id}
+                    task={task}
+                    onDeleteTask={handleDeleteTask}
+                />
             ))}
         </div>
     );

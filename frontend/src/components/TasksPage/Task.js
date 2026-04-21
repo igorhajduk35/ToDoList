@@ -7,7 +7,7 @@ import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-function Task({task}) {
+function Task({task, onDeleteTask}) {
     // Modals
     const [showTaskModal, setShowTaskModal] = useState(false);
     const [showDiscardTaskAlert, setShowDiscardTaskAlert] = useState(false);
@@ -86,7 +86,7 @@ function Task({task}) {
                         <Button 
                             variant="danger"
                             onClick={() => {
-                                // delete logic
+                                onDeleteTask(task.id);
                                 setShowDiscardTaskAlert(false);
                                 setShowTaskModal(false);
                             }}

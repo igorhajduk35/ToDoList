@@ -40,14 +40,14 @@ def get_tasks():
 
     cursor.execute(
         """
-        SELECT * FROM tasks;
+            SELECT * FROM tasks;
         """
     )
 
     results = cursor.fetchall()
 
     if len(results) == 0:
-        return jsonify({"message": "database is empty", "users": []})
+        return jsonify({"message": "Tasks table is empty", "tasks": []})
 
     output = []
 
@@ -63,7 +63,7 @@ def get_tasks():
             "due_date": result[7]
         })
 
-    return jsonify({"message": "Success", "users": output})
+    return jsonify({"message": "Success", "tasks": output})
 
 
 @app.route("/add_task", methods=["POST"])
@@ -75,7 +75,7 @@ def add_task():
     # read from request
     task_title = data.get("task_title")
     task_description = data.get("task_description")
-    assigned_to = data.get("assigned_to")
+    assigned_to = data.get("task_assigned_to")
 
     if assigned_to == "self":
         # Search for "Adam" in db
@@ -104,19 +104,28 @@ def add_task():
 
     db_connection.commit()
 
-    return jsonify({"message": "User added!"})
+    return jsonify({"message": "Task added!"})
 
 
 @app.route("/discard_task", methods=["POST"])
 def discard_task():
+    data = request.get_json()
+
+    task_id = data.get("task_id")
+
     cursor = db_connection.cursor()
 
     cursor.execute(
         """
-        DELETE * FROM tasks
-        WHERE id = ?
-        """
+        DELETE FROM tasks
+        WHERE id = %s
+        """,
+        (task_id,)
     )
+
+    db_connection.commit()
+
+    get_tasks()
 
     return jsonify({"message": "Success"})
 
