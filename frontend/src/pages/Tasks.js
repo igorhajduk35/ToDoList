@@ -17,7 +17,7 @@ function Tasks() {
             }),
         });
 
-        fetchData();
+        loadTasks();
     }
 
     const handleAddTask = async(title, description, assigned_to, due_date) => {
@@ -39,15 +39,15 @@ function Tasks() {
                 throw new Error("Failed to add task")
             }
 
-            fetchData();
+            loadTasks();
 
         } catch (err) {
             console.error(err)
         }
     }
 
-    const fetchData = async() => {
-        const response = await fetch("http://localhost:5050/get_tasks");
+    const loadTasks = async() => {
+        const response = await fetch("http://localhost:5050/get_tasks?status=any");
 
         const data = await response.json();
 
@@ -55,21 +55,61 @@ function Tasks() {
     }
 
     useEffect(() => {
-        fetchData()
+        loadTasks();
     }, [])
 
+    const todoTasks = tasks.filter(t => t.status === "todo")
+    const inProgressTasks = tasks.filter(t => t.status === "in_progress")
+    const completedTasks = tasks.filter(t => t.status === "completed")
+    const expiredTasks = tasks.filter(t => t.status === "expired")
+
+
     return(
-        <div>
-            <TaskManipulationNavbar
-                onAddTask={handleAddTask}
-            />
-            {tasks.map(task => (
-                <Task
-                    key={task.id}
-                    task={task}
-                    onDeleteTask={handleDeleteTask}
-                />
-            ))}
+        <div className="mt-3">
+            <TaskManipulationNavbar onAddTask={handleAddTask}/>
+
+            <div className="text-center row mt-2 m-5">
+                <div className="col d-flex flex-column align-items-center shadow-sm py-3 m-3">
+                    <h3>Todo</h3>
+                    {todoTasks.map(task => (
+                        <Task
+                            key={task.id}
+                            task={task}
+                            onDeleteTask={handleDeleteTask}
+                        />
+                    ))}
+                </div>
+                <div className="col d-flex flex-column align-items-center shadow-sm py-3 m-3">
+                    <h3>In Progress</h3>
+                    {inProgressTasks.map(task => (
+                        <Task
+                            key={task.id}
+                            task={task}
+                            onDeleteTask={handleDeleteTask}
+                        />
+                    ))}
+                </div>
+                <div className="col d-flex flex-column align-items-center shadow-sm py-3 m-3">
+                    <h3>Completed</h3>
+                    {completedTasks.map(task => (
+                        <Task
+                            key={task.id}
+                            task={task}
+                            onDeleteTask={handleDeleteTask}
+                        />
+                    ))}
+                </div>
+                <div className="col d-flex flex-column align-items-center shadow-sm py-3 m-3">
+                    <h3>Expired</h3>
+                    {expiredTasks.map(task => (
+                        <Task
+                            key={task.id}
+                            task={task}
+                            onDeleteTask={handleDeleteTask}
+                        />
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }

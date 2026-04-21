@@ -15,8 +15,8 @@ function Task({task, onDeleteTask}) {
     return (
         <>
             <Card 
-                className="task-card d-flex flex-row align-items-center p-3"
-                style={{width:'25rem'}}
+                className="task-card d-flex flex-row align-items-center p-4 m-2"
+                style={{width:'100%'}}
                 onClick={()  => setShowTaskModal(true)}
             >
                 <Image

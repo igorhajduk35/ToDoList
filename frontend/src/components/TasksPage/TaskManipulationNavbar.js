@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal } from 'react-bootstrap';
+import { Modal, Container} from 'react-bootstrap';
 import Navbar from 'react-bootstrap/Navbar';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
@@ -43,18 +43,24 @@ function TaskManipulationNavbar({onAddTask}) {
         <>
             <Navbar 
                 sticky="top"
-                className="bg-body-tertiary justify-content-between"
+                bg="light"
+                expand="lg"
+                className="bg-body-tertiary justify-content-between shadow-sm py-3"
             >
-                <Form
-                    inline
-                    className="align-items-center justfiy-content-center"
-                >
-                    <Row>
-                        <Col xs="auto">
-                            <Button onClick={() => setShowAddTaskModal(true)}>Create a Task</Button>
-                        </Col>
-                    </Row>
-                </Form>
+                <Container fluid>
+                    <Navbar.Brand>Task Manager</Navbar.Brand>
+
+                    <Form
+                        inline="true"
+                        className="d-flex"
+                    >
+                        <Row>
+                            <Col xs="auto">
+                                <Button onClick={() => setShowAddTaskModal(true)}>Create a Task</Button>
+                            </Col>
+                        </Row>
+                    </Form>
+                </Container>
             </Navbar>
 
             <Modal 

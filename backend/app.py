@@ -26,42 +26,60 @@ app = Flask(__name__)
 CORS(app)
 
 
-# @app.route("/api")
-# def hello():
-#     cursor = db_connection.cursor()
-#     cursor.execute("SELECT 'Hello from PostgreSQL!' ")
-#     result = cursor.fetchone()
-#     return jsonify({"message": result[0]})
-
-
 @app.route("/get_tasks", methods=["GET"])
 def get_tasks():
+    db_connection.rollback()
+
     cursor = db_connection.cursor()
 
-    cursor.execute(
-        """
-            SELECT * FROM tasks;
-        """
-    )
+    task_status = request.args.get("status")
 
-    results = cursor.fetchall()
+    valid_statuses = {"any", "todo", "in_progress", "completed", "expired"}
 
-    if len(results) == 0:
-        return jsonify({"message": "Tasks table is empty", "tasks": []})
+    if task_status not in valid_statuses:
+        return jsonify({"message": "Fail: Invalid status"}), 400
 
-    output = []
+    else:
+        if task_status == "any":
+            sql_query = "SELECT * FROM tasks;"
 
-    for result in results:
-        output.append({
-            "id": result[0],
-            "title": result[1],
-            "description": result[2],
-            "assigned_for": result[3],
-            "assigned_by": result[4],
-            "status": result[5],
-            "created_at": result[6],
-            "due_date": result[7]
-        })
+        elif task_status == "todo":
+            sql_query = "SELECT * FROM tasks WHERE status = 'todo';"
+
+        elif task_status == "in_progress":
+            sql_query = "SELECT * FROM tasks WHERE status = 'in_progress';"
+
+        elif task_status == "completed":
+            sql_query = "SELECT * FROM tasks WHERE status = 'completed';"
+
+        else:
+            sql_query = "SELECT * FROM tasks WHERE status = 'expired';"
+
+        try:
+            cursor.execute(sql_query)
+
+            results = cursor.fetchall()
+        except Exception as e:
+            db_connection.rollback()
+            print("DB error:", e)
+            return jsonify({"message": "Database error"}), 500
+
+        if len(results) == 0:
+            return jsonify({"message": "Tasks table is empty", "tasks": []})
+
+        output = []
+
+        for result in results:
+            output.append({
+                "id": result[0],
+                "title": result[1],
+                "description": result[2],
+                "assigned_for": result[3],
+                "assigned_by": result[4],
+                "status": result[5],
+                "created_at": result[6],
+                "due_date": result[7]
+            })        
 
     return jsonify({"message": "Success", "tasks": output})
 
@@ -95,9 +113,9 @@ def add_task():
 
     cursor.execute(
         """
-            INSERT INTO tasks
-            (title, description, assigned_for, assigned_by, status, created_at, due_date)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO tasks
+        (title, description, assigned_for, assigned_by, status, created_at, due_date)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
         """,
         (task_title, task_description, assigned_to, assigned_by, task_status, created_at, task_due_date)
     )
