@@ -1,7 +1,12 @@
+import ProfileSection from '../components/ProfilePage/ProfileSection';
+import { useParams } from 'react-router-dom';
+
 function Profile() {
+    const { username } = useParams();    
+
     return(
         <div>
-            <h2>Profile</h2>
+            <ProfileSection username={username}/>
         </div>
     );
 }

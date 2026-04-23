@@ -3,6 +3,7 @@ from flask_cors import CORS
 import psycopg2
 import time
 from datetime import datetime, timedelta, timezone
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 while True:
@@ -25,6 +26,68 @@ while True:
 app = Flask(__name__)
 CORS(app)
 
+
+@app.route("/user/<username>", methods=["POST", "GET"])
+def get_user(username):
+    cursor = db_connection.cursor()
+
+    cursor.execute(
+        """
+        SELECT username FROM users
+        WHERE username = %s;
+        """,
+        (username,)
+    )
+
+    user = cursor.fetchone()
+
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+    
+    return jsonify({
+        "username": user[0]
+    }) 
+
+
+# @app.route("/register", methods=["POST"])
+# def register():
+#     data = request.get_json()
+
+#     username = data.get("username")
+#     password = data.get("password")
+
+#     if not username or not password:
+#         return jsonify({"message": "Missing fields"}), 400
+    
+#     password_hash = generate_password_hash(password)
+
+#     cursor = db_connection.cursor()
+
+#     cursor.execute(
+#         """
+#         INSERT INTO users(username, password, created_at)
+#         VALUES(%s, %s, %s);
+#         """,
+#         (username, password_hash, datetime.now(timezone.utc))
+#     )
+
+#     db_connection.commit()
+
+#     return jsonify({"message": "user created"})
+
+
+# @app.route("/login", methods=["POST"])
+# def login():
+#     cursor = db_connection.cursor()
+
+#     cursor.execute(
+#         """
+#         SELECT password FROM users
+#         WHERE username = 'Adam';
+#         """
+#     )
+
+#     db_connection.commit()
 
 @app.route("/get_tasks", methods=["GET"])
 def get_tasks():
@@ -115,7 +178,7 @@ def add_task():
         """
         INSERT INTO tasks
         (title, description, assigned_for, assigned_by, status, created_at, due_date)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s);
         """,
         (task_title, task_description, assigned_to, assigned_by, task_status, created_at, task_due_date)
     )
